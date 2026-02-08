@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GuestList } from "./GuestList";
 import { GuestInfo } from "./GuestInfo";
 
-export default function App() {
-  const [guests, setGuests] = useState([
-    { id: 1, name: "Harry", email: "Harry_Osborne123@gmail.com" },
-    { id: 2, name: "Peter", email: "Peter_Parker456@gmail.com" },
-    { id: 3, name: "Norman", email: "Norman_Osborne789@gmail.com" },
-    { id: 4, name: "Tom", email: "Tom_Holland112@gmail.com" },
-    { id: 5, name: "Andrew", email: "Andrew_Garfield113@gmail.com" },
-    { id: 6, name: "Mary", email: "Mary_Jane114@gmail.com" },
-  ]);
+const BASE = "https://fsa-crud-2aa9294fe819.herokuapp.com/api";
+const COHORT = "/2601-FTB-ET-WEB-FT";
+const API = BASE + COHORT;
 
+export default function App() {
+  const [guests, setGuests] = useState([]);
   const [selectedGuest, setSelectedGuest] = useState({});
   const [isSelected, setIsSelected] = useState(false);
+
+  useEffect(() => {
+    fetchGuests(setGuests);
+  }, []); //* The empty dependency list means "useEffect()" will only trigger once when DOM renders
 
   const toggleSelectedGuest = (currGuest) => {
     if (!isSelected) {
@@ -25,12 +25,26 @@ export default function App() {
     }
   };
 
-  return !isSelected ? (
-    <GuestList guests={guests} toggleSelectedGuest={toggleSelectedGuest} />
-  ) : (
-    <GuestInfo
-      selectedGuest={selectedGuest}
-      toggleSelectedGuest={toggleSelectedGuest}
-    />
+  return (
+    <section>
+      {!isSelected ? (
+        <GuestList guests={guests} toggleSelectedGuest={toggleSelectedGuest} />
+      ) : (
+        <GuestInfo
+          selectedGuest={selectedGuest}
+          toggleSelectedGuest={toggleSelectedGuest}
+        />
+      )}
+    </section>
   );
+}
+
+async function fetchGuests(setGuests) {
+  try {
+    const response = await fetch(API + "/guests");
+    const data = await response.json();
+    setGuests(data.data);
+  } catch (error) {
+    console.error(error);
+  }
 }
